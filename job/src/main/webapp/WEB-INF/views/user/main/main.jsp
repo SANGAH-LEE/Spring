@@ -14,9 +14,9 @@
 		<!-- <img src="/resources/images/main/main01.jpg" alt="main01.jpg" width="100%"> -->
 		<h2><strong><i class="far fa-thumbs-up" style="color: green;"></i> 오늘의 추천 기업</strong></h2>
 		<div class="box01">
-			<div class="row">
+			<div class="row border">
 			<c:forEach var="name" items="${list}">
-				<div class="col-sm-3  bg-light p-5">
+				<div class="col-sm-3 p-5">
 					<h4><span class="badge badge-success">${name.company}&nbsp;</span><span class="badge badge-light">${name.field}</span></h4>
 					<div class="fakeimg">
 						<a href="/user/review/reviewSelectList.do?bsmno=${name.bsmno}" class="img-box">
@@ -30,9 +30,9 @@
 		</div>
 		<h2><strong><i class="fas fa-edit" style="color: green;"></i> 최근 기업 리뷰</strong></h2>
 		<div class="box01">
-			<div class="row">
+			<div class="row border">
 	      	<c:forEach var="frm" items="${list2}">
-				<div class="col-sm-3 bg-light p-5">
+				<div class="col-sm-3 p-5">
 					<h5><span class="badge badge-success">${frm.company}&nbsp;</span><span class="badge badge-light">${frm.reg_date}</span></h5>
 					<a href="/user/review/reviewSelectList.do?bsmno=${frm.bsmno}" >${frm.review}</a>
 				</div>

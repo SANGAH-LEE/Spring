@@ -70,7 +70,7 @@ $(document).ready(function() {
 	
 		<div class="collapse navbar-collapse" id="navb">
 			<ul class="navbar-nav mr-auto">
-				<li class="nav-item"><a class="nav-link font-weight-bold" href="/user/biz/info/bizInfo.do" >기업</a></li>
+				<li class="nav-item"><a class="nav-link font-weight-bold" href="/user/biz/info/bizInfo.do" style="color: black">기업</a></li>
 			</ul>
 			<form class="form-inline my-2 my-lg-0" action="/user/biz/info/bizInfo.do">
 				<ul class="navbar-nav mr-auto">
@@ -114,7 +114,7 @@ $(document).ready(function() {
 										<a class="dropdown-item" href="/user/mypage/member/memMyDeleteForm.do">탈퇴</a>
 									</div>
 								</li>
-								<li class="nav-item font-weight-bold"><a class="nav-link" href="/user/member/login/memLogout.do">로그아웃</a></li>
+								<li class="nav-item font-weight-bold"><a class="nav-link" href="/user/member/login/memLogout.do" style="color: black">로그아웃</a></li>
 							</c:if>
 							<c:if test="${!empty sessionScope.b_user.bsmno}">
 								<a class="navbar-brand" href="#">
