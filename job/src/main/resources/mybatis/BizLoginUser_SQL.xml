@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bizLogin">
+	<!-- 기업로그인 -->
+	<select id="b_Login"  resultType="BizLoginUserVO">
+		<![CDATA[
+		         select b.bsmno, 
+		                b.pass,
+		                b.bnum,
+		                b.type,
+		                b.company,
+		                b.email,
+		                b.ceo,
+		                b.phone,
+		                b.field,
+		                b.addr,
+		                b.attachid,
+		                b.reg_date,
+		                b.up_date,
+		                b.del_date,
+		                b.del_yn,
+		                b.addr1,
+		                b.addr3,
+		                i.originalfilename,
+				        i.storedfilename,
+				        i.filesize
+		         from   biz b,image i
+		         where  bsmno=#{bsmno} and pass=#{pass} and del_yn='N' and b.attachid=i.attachid
+		]]>
+	</select>
+	
+	<!-- 기업로그인 체크 -->
+	<select id="b_LoginCheck" parameterType="BizLoginUserVO" resultType="int">
+		<![CDATA[
+			  	 select count(*)
+			  	 from   biz
+				 where  bsmno=#{bsmno} and pass=#{pass} and del_yn='N'
+		]]>
+	</select>
+	
+	<!-- 기업 사업자 번호 찾기 -->
+	<select id="findBsmno" parameterType="String" resultType="String">
+		<![CDATA[
+				select bsmno
+				from   biz
+				where  company=#{company} and phone=#{phone} and email=#{email} and del_yn='N'
+		]]>
+	
+	</select>
+	
+	<!-- 기업 비밀번호 변경을 위한 사업자 번호, 이메일 일치 여부 -->
+	<select id="bizPassCheck" resultType="int">
+		<![CDATA[
+				select count(*)
+				from   biz
+				where  bsmno=#{bsmno} and email=#{email} and del_yn='N' 
+		]]>
+	</select>
+	
+	
+	
+	<!-- 기업 비밀번호 변경 -->
+	<update id="bizPassChange" parameterType="hashMap">
+		<![CDATA[
+				update biz
+				set    pass=#{pass}
+				where  email=#{email} and del_yn='N' 
+		]]>
+	</update>
+
+</mapper>

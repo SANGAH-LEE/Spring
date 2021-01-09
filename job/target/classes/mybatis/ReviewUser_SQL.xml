@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reviewUser">
+
+	<select id="reviewBizInfo" parameterType="ReviewUserVO" resultType="ReviewUserVO">
+		<![CDATA[
+			SELECT 
+				B.COMPANY, B.FIELD, B.ADDR, B.CEO, B.PHONE, B.ADDR1, B.ADDR3, I.STOREDFILENAME 
+			FROM BIZ B, IMAGE I 
+			WHERE 1=1 
+			AND B.ATTACHID=I.ATTACHID 
+			AND BSMNO=#{bsmno}
+		]]>
+	</select>
+	<!-- 리뷰리스트 -->
+	<select id="reviewList1" parameterType="ReviewUserVO" resultType="ReviewUserVO">
+		<![CDATA[
+		SELECT 
+			*
+		FROM 
+		(
+			SELECT 
+				ROWNUM RN
+				, RNUM
+				, ID
+				, BSMNO
+				, REVIEW
+				, MREVIEW
+				, SAL
+				, SPOT
+				, B_CNT
+				, REG_DATE
+				, UP_DATE
+				, DEL_DATE
+				, DEL_YN
+				, M_STATUS
+				, M_DIFFICULTLY
+				, M_DATE
+				, COMPANY
+				, FIELD
+				, ATTACHID
+			FROM (
+				SELECT 
+					A.RNUM
+					, A.ID
+					, A.BSMNO
+					, A.REVIEW
+					, A.MREVIEW
+					, A.SAL
+					, A.SPOT
+					, A.B_CNT
+					, TO_CHAR(A.REG_DATE,'YYYY/MM/DD') AS REG_DATE
+					, TO_CHAR(A.UP_DATE,'YYYY/MM/DD') AS UP_DATE
+					, TO_CHAR(A.DEL_DATE,'YYYY/MM/DD') AS DEL_DATE
+					, A.DEL_YN
+					, A.M_STATUS
+					, A.M_DIFFICULTLY
+					, TO_CHAR(A.M_DATE,'YYYY/MM/DD') AS M_DATE
+					, B.COMPANY
+					, B.FIELD
+					, B.ATTACHID
+				FROM REVIEW A, BIZ B
+				WHERE 1=1
+				AND A.DEL_YN='N'
+				AND A.BSMNO=#{bsmno}
+				AND A.REVIEW IS NOT NULL
+				AND A.BSMNO=B.BSMNO
+				ORDER BY A.REG_DATE DESC
+			) A
+		) A
+		WHERE 1=1 
+		AND RN BETWEEN #{start} AND #{end}
+		]]>
+	</select>
+	<select id="reviewList2" parameterType="ReviewUserVO" resultType="ReviewUserVO">
+		<![CDATA[
+		SELECT 
+			*
+		FROM 
+		(
+			SELECT 
+				ID
+				, BSMNO
+				, AVG_SAL
+				, SPOT
+				, MAX_SAL
+				, MIN_SAL
+				, PER_SAL
+			FROM (
+				SELECT 
+					MAX(ID) AS ID
+					, BSMNO
+					, AVG(SAL) AS AVG_SAL
+					, MAX(SPOT) AS SPOT
+		          	, MAX(TO_NUMBER(SAL)) AS MAX_SAL
+		          	, MIN(TO_NUMBER(SAL)) AS MIN_SAL
+		          	, ROUND((AVG(SAL)/MAX(SAL))*100,2)||'%' AS PER_SAL
+				FROM REVIEW 
+				WHERE 1=1
+				AND DEL_YN='N'
+				AND SAL IS NOT NULL
+		        GROUP BY SPOT, BSMNO
+			) A
+		) A, BIZ B
+		WHERE 1=1 
+		AND A.BSMNO=#{bsmno}
+		AND A.BSMNO=B.BSMNO 
+		]]>
+	</select>
+	<select id="reviewList3" parameterType="ReviewUserVO" resultType="ReviewUserVO">
+		<![CDATA[
+		SELECT 
+		*
+		FROM 
+		(
+			SELECT 
+				ROWNUM RN
+				, RNUM
+				, ID
+				, BSMNO
+				, MREVIEW
+				, REVIEW
+				, SAL
+				, SPOT
+				, B_CNT
+				, REG_DATE
+				, UP_DATE
+				, DEL_DATE
+				, DEL_YN
+				, M_STATUS
+				, M_DIFFICULTLY
+				, M_DATE
+				, COMPANY
+				, FIELD
+				, ATTACHID
+			FROM (
+				SELECT 
+					A.RNUM
+					, A.ID
+					, A.BSMNO
+					, A.MREVIEW
+					, A.REVIEW
+					, A.SAL
+					, A.SPOT
+					, A.B_CNT
+					, TO_CHAR(A.REG_DATE,'YYYY/MM/DD') AS REG_DATE
+					, TO_CHAR(A.UP_DATE,'YYYY/MM/DD') AS UP_DATE
+					, TO_CHAR(A.DEL_DATE,'YYYY/MM/DD') AS DEL_DATE
+					, A.DEL_YN
+					, A.M_STATUS
+					, A.M_DIFFICULTLY
+					, TO_CHAR(A.M_DATE,'YYYY/MM/DD') AS M_DATE
+					, B.COMPANY
+					, B.FIELD
+					, B.ATTACHID
+				FROM REVIEW A, BIZ B
+				WHERE 1=1
+				AND A.DEL_YN='N'
+				AND A.BSMNO=#{bsmno}
+				AND A.MREVIEW IS NOT NULL
+				AND A.BSMNO=B.BSMNO
+				ORDER BY A.REG_DATE DESC
+			) A
+		) A
+		WHERE 1=1 
+		AND RN BETWEEN #{start} AND #{end}
+		]]>
+	</select>
+	
+	<select id="total1" resultType="int">
+		select count(*) from REVIEW where 1=1 and DEL_YN='N' and REVIEW is not null and bsmno=#{bsmno}
+	</select>
+		
+	<select id="total2" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+		(
+			SELECT 
+				ID
+				, BSMNO
+				, AVG_SAL
+				, SPOT
+				, MAX_SAL
+				, MIN_SAL
+				, PER_SAL
+			FROM (
+				SELECT 
+					MAX(ID) AS ID
+					, BSMNO
+					, AVG(SAL) AS AVG_SAL
+					, MAX(SPOT) AS SPOT
+		          	, MAX(SAL) AS MAX_SAL
+		          	, MIN(SAL) AS MIN_SAL
+		          	, ROUND((AVG(SAL)/MAX(SAL))*100,2)||'%' AS PER_SAL
+				FROM REVIEW
+				WHERE 1=1
+				AND DEL_YN='N'
+				AND SAL IS NOT NULL
+		        GROUP BY SPOT, BSMNO
+			) A
+		) A, BIZ B
+		WHERE 1=1
+		and a.bsmno=#{bsmno} 
+		AND A.BSMNO=B.BSMNO 
+	</select>
+	
+	<select id="total3" resultType="int">
+		select count(*) from REVIEW where 1=1 and DEL_YN='N' and MREVIEW is not null and bsmno=#{bsmno}
+	</select>
+	
+	<!-- 글 작성 -->
+	<insert id="reviewWrite" parameterType="ReviewUserVO">
+			INSERT INTO REVIEW (rnum, bsmno, id, review, b_cnt, reg_date, up_date, del_yn)
+				VALUES (REVIEW_SEQ.nextval, #{bsmno}, #{id}, #{review}, 0, sysdate, sysdate, 'N')
+	</insert>
+	<insert id="mreviewWrite" parameterType="ReviewUserVO">
+			INSERT INTO REVIEW (rnum, bsmno, id, m_status, m_difficultly, mreview, b_cnt, reg_date, up_date, del_yn, m_date)
+				VALUES (REVIEW_SEQ.nextval, #{bsmno}, #{id}, #{m_status}, #{m_difficultly}, #{mreview}, 0, sysdate, sysdate, 'N', to_date(#{m_date},'yyyy-mm-dd'))
+	</insert>
+	<insert id="salWrite" parameterType="ReviewUserVO">
+			INSERT INTO REVIEW (rnum, bsmno, id, spot, sal, reg_date, up_date, del_yn)
+				VALUES (REVIEW_SEQ.nextval, #{bsmno}, #{id}, #{spot}, #{sal}, sysdate, sysdate, 'N')
+	</insert>
+	
+	<!-- 글 상세조회 -->
+	<select id="reviewDetail" resultType="ReviewUserVO" parameterType="ReviewUserVO">
+	  SELECT rownum rn
+	  			, RNUM
+	  			, ID
+	  			, BSMNO
+	  			, MREVIEW
+				, REVIEW
+				, SAL
+				, SPOT
+				, B_CNT
+				, TO_CHAR(REG_DATE,'YYYY-MM-DD') AS REG_DATE
+				, TO_CHAR(UP_DATE,'YYYY-MM-DD') AS UP_DATE
+				, TO_CHAR(DEL_DATE,'YYYY-MM-DD') AS DEL_DATE
+				, DEL_YN
+				, M_STATUS
+				, M_DIFFICULTLY
+				, TO_CHAR(M_DATE,'YYYY-MM-DD') AS M_DATE
+				, (SELECT COMPANY FROM BIZ B WHERE 1=1 AND A.BSMNO=B.BSMNO) AS COMPANY
+				FROM REVIEW A WHERE RNUM = #{rnum}
+	</select>
+	
+	<select id="reviewSalChk" resultType="int" parameterType="ReviewUserVO">
+	  SELECT COUNT(*) FROM REVIEW WHERE BSMNO=#{bsmno} AND ID=#{id} AND SPOT=#{spot}
+	</select>
+	
+	<update id="salChkUpdate" parameterType="ReviewUserVO">
+		UPDATE REVIEW 
+		SET 
+			   SAL = #{sal}, 
+			   UP_DATE = sysdate	
+		WHERE BSMNO=#{bsmno} AND ID=#{id} AND SPOT=#{spot}
+	</update>
+	
+	<!-- 게시글 수정 -->
+	<update id="reviewUpdate" parameterType="ReviewUserVO">
+		UPDATE REVIEW 
+		SET 
+			  REVIEW = #{review},
+			  UP_DATE = sysdate		
+		WHERE RNUM = #{rnum}
+	</update>
+	<update id="salUpdate" parameterType="ReviewUserVO">
+		UPDATE REVIEW 
+		SET 
+			   SAL = #{sal}, 
+			   SPOT = #{spot},
+			   UP_DATE = sysdate	
+		WHERE  RNUM = #{rnum}
+	</update>
+ 	<update id="mreviewUpdate" parameterType="ReviewUserVO">
+		UPDATE REVIEW 
+		SET 
+				MREVIEW = #{mreview},
+				M_STATUS = #{m_status},
+				M_DIFFICULTLY = #{m_difficultly},
+				M_DATE = #{m_date},
+				UP_DATE = sysdate
+		WHERE RNUM = #{rnum}
+	</update> 
+
+	<!-- 리뷰 삭제 -->
+	<update id="reviewDelete" parameterType="int">
+		UPDATE REVIEW SET DEL_YN = 'Y' WHERE RNUM = #{rnum}
+	</update>
+	
+</mapper>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bizInfo">
+
+<!-- 기업 정보 보기 -->
+	<select id="b_Info" resultType="BizUserVO" parameterType="BizUserVO">
+		<![CDATA[
+		select 
+			rn,
+			BSMNO,
+			ATTACHID,
+			PASS,
+			BNUM,
+			TYPE,
+			COMPANY,
+			EMAIL,
+			CEO,
+			PHONE,
+			FIELD,
+			ADDR,
+			TO_CHAR(REG_DATE,'YYYYMMDD') AS REG_DATE,
+			TO_CHAR(UP_DATE,'YYYYMMDD') AS UP_DATE,
+			TO_CHAR(DEL_DATE,'YYYYMMDD') AS DEL_DATE,
+			DEL_YN,
+      		STOREDFILENAME,
+		      (select count(*) from REVIEW r where 1=1 and DEL_YN='N' and REVIEW is not null and r.bsmno=a.bsmno) as REVIEW,
+		      (SELECT 
+		        COUNT(*)
+		      FROM 
+		      (
+		        SELECT 
+		         BSMNO
+		        FROM (
+		          SELECT 
+		            BSMNO
+		          FROM REVIEW
+		          WHERE 1=1
+		          AND DEL_YN='N'
+		          AND SAL IS NOT NULL
+		              GROUP BY SPOT, BSMNO
+		        ) c
+		      ) c
+		      WHERE 1=1
+		      and c.bsmno=a.bsmno) as sal,
+		      (select count(*) from REVIEW r where 1=1 and DEL_YN='N' and MREVIEW is not null and r.bsmno=a.bsmno) as MREVIEW
+		from 
+		(select 
+			rownum rn,
+			b.*, i.STOREDFILENAME
+			from biz b, image i
+			where 1=1
+			and b.ATTACHID=i.ATTACHID
+			and rownum < #{end}) a
+		where 1=1  
+		and rn between #{start} and #{end}
+		]]>
+		<if test="keyword !=null and keyword != ''">
+			AND COMPANY LIKE '%'||#{keyword}||'%'
+			ORDER BY BNUM DESC, REG_DATE DESC
+		</if>
+	</select>
+	
+	
+	<!-- 검색자동완성-->
+	<select id="autocomplete" resultType="BizUserVO">
+		SELECT COMPANY
+		FROM   BIZ
+		WHERE  COMPANY LIKE '%'||#{keyword}||'%'
+		ORDER BY BNUM DESC, REG_DATE DESC
+	</select>
+	
+	
+	
+	<!-- 기업 검색 -->
+	<select id="findBizByCompany" resultType="String" parameterType="String" >
+		<![CDATA[
+			SELECT	*
+			FROM	BIZ
+			WHERE	NAME LIKE #{company}
+		]]>
+	</select>
+	<select id="findBizByField" resultType="String" parameterType="String" >
+		<![CDATA[
+			SELECT	*
+			FROM	BIZ
+			WHERE	NAME LIKE #{field}
+		]]>
+	</select>
+	<select id="findBizByAddr" resultType="String" parameterType="String" >
+		<![CDATA[
+			SELECT	*
+			FROM	BIZ
+			WHERE	NAME LIKE #{addr}
+		]]>
+	</select>
+	
+	
+	<!-- 총 게시글 갯수 출력 -->
+	<select id="countBiz" resultType="int">
+	<![CDATA[
+		SELECT COUNT(*) FROM BIZ
+		]]>
+	</select>
+
+	<!-- 페이징 처리 후 기업 조회 -->
+	<select id="selectBiz" resultType="BizUserVO">
+		<![CDATA[
+		SELECT 
+			 BSMNO,
+			 ATTACHID,
+				PASS,
+				BNUM,
+				TYPE,
+				COMPANY,
+				EMAIL,
+				CEO,
+				PHONE,
+				FIELD,
+				ADDR,
+				REG_DATE,
+				UP_DATE,
+				DEL_DATE,
+				DEL_YN
+			FROM (
+				SELECT BSMNO RN, A.* 
+					FROM (
+							SELECT * 
+							FROM BIZ 
+							ORDER BY SEQ DESC 
+							) A
+					)
+		WHERE RN BETWEEN #{start} AND #{end}
+		]]>
+	</select>
+	<select id="total" resultType="int">
+		select count(*) from Biz where 1=1 and DEL_YN='N' and bsmno is not null
+	</select>
+</mapper>
